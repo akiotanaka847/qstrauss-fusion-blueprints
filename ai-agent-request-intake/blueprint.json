@@ -1,0 +1,351 @@
+{
+  "name": "QStrauss AI Agent - Request Intake",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": 789654,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        },
+        "restore": {
+          "parameters": {
+            "hook": {
+              "data": {
+                "editable": "true"
+              },
+              "label": "QStrauss AI Agent Intake"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "hook",
+            "type": "hook:gateway-webhook",
+            "label": "Webhook",
+            "required": true
+          },
+          {
+            "name": "maxResults",
+            "type": "number",
+            "label": "Maximum number of results"
+          }
+        ],
+        "interface": [
+          {
+            "name": "form_type",
+            "type": "text"
+          },
+          {
+            "name": "request",
+            "type": "collection",
+            "spec": [
+              {
+                "name": "type_of_application",
+                "type": "text"
+              },
+              {
+                "name": "priority",
+                "type": "text"
+              },
+              {
+                "name": "client",
+                "type": "text"
+              },
+              {
+                "name": "related_project",
+                "type": "text"
+              },
+              {
+                "name": "description_of_requirements",
+                "type": "text"
+              },
+              {
+                "name": "problem_or_need",
+                "type": "text"
+              },
+              {
+                "name": "expected_benefit",
+                "type": "text"
+              },
+              {
+                "name": "requires_external_integration",
+                "type": "boolean"
+              },
+              {
+                "name": "external_system",
+                "type": "text"
+              },
+              {
+                "name": "development_type",
+                "type": "array",
+                "spec": {
+                  "type": "text"
+                }
+              },
+              {
+                "name": "is_new_functionality",
+                "type": "boolean"
+              },
+              {
+                "name": "object_and_level",
+                "type": "text"
+              },
+              {
+                "name": "what_needs_to_be_done",
+                "type": "text"
+              },
+              {
+                "name": "ids_of_objects_involved",
+                "type": "text"
+              },
+              {
+                "name": "expected_field_values",
+                "type": "text"
+              },
+              {
+                "name": "event_that_triggers_the_flow",
+                "type": "text"
+              },
+              {
+                "name": "conditions_and_exceptions",
+                "type": "text"
+              },
+              {
+                "name": "necessary_permissions",
+                "type": "text"
+              },
+              {
+                "name": "real_example_for_testing",
+                "type": "text"
+              },
+              {
+                "name": "expected_technical_result",
+                "type": "text"
+              },
+              {
+                "name": "additional_information",
+                "type": "text"
+              }
+            ]
+          },
+          {
+            "name": "consultant_name",
+            "type": "text"
+          },
+          {
+            "name": "consultant_email",
+            "type": "text"
+          },
+          {
+            "name": "teams_conversation_id",
+            "type": "text"
+          },
+          {
+            "name": "submitted_at",
+            "type": "date"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "gateway:Router",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 3,
+              "module": "workfront:CreateRecord",
+              "version": 1,
+              "parameters": {
+                "record": "OPTASK",
+                "connection": "workfront-qstraussptrsd"
+              },
+              "filter": {
+                "name": "Form General",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{1.form_type}}",
+                      "o": "text:equal",
+                      "b": "general"
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "name": "{{1.request.description_of_requirements}}",
+                "description": "Tipo: {{1.request.type_of_application}}\nPrioridad: {{1.request.priority}}\nCliente: {{1.request.client}}\nProyecto: {{1.request.related_project}}\nProblema: {{1.request.problem_or_need}}\nBeneficio: {{1.request.expected_benefit}}\nIntegración: {{if(1.request.requires_external_integration; \"Sí - \" + 1.request.external_system; \"No\")}}\nSolicitado por: {{1.consultant_name}} ({{1.consultant_email}})\nFecha: {{formatDate(1.submitted_at; \"YYYY-MM-DD HH:mm:ss\")}}",
+                "priority": "{{switch(1.request.priority; \"High\"; 2; \"Medium\"; 3; \"Low\"; 4; 4)}}",
+                "categoryID": "6933061c000706e95fa140dbe15ccc94",
+                "DE:Type of Application": "{{1.request.type_of_application}}",
+                "DE:Priority": "{{1.request.priority}}",
+                "DE:Client": "{{1.request.client}}",
+                "DE:Related Project": "{{1.request.related_project}}",
+                "DE:Description of requirements": "{{1.request.description_of_requirements}}",
+                "DE:Problem or need that one seeks to solve": "{{1.request.problem_or_need}}",
+                "DE:Expected benefit": "{{1.request.expected_benefit}}",
+                "DE:Does it require integration with an external system?": "{{if(1.request.requires_external_integration; \"Yes\"; \"No\")}}",
+                "DE:External system to be integrated": "{{1.request.external_system}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 600,
+                  "y": -150
+                },
+                "restore": {
+                  "expect": {
+                    "record": {
+                      "label": "Issue"
+                    },
+                    "connection": {
+                      "label": "QStrauss Workfront"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": 5,
+              "module": "gateway:WebhookRespond",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "status": "200",
+                "headers": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": "{\"success\": true, \"ticketId\": \"{{3.id}}\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": -150
+                }
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 4,
+              "module": "workfront:CreateRecord",
+              "version": 1,
+              "parameters": {
+                "record": "OPTASK",
+                "connection": "workfront-qstraussptrsd"
+              },
+              "filter": {
+                "name": "Form WF",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{1.form_type}}",
+                      "o": "text:equal",
+                      "b": "wf"
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "name": "{{1.request.what_needs_to_be_done}}",
+                "description": "Desarrollo: {{join(1.request.development_type; \", \")}}\nNueva funcionalidad: {{if(1.request.is_new_functionality; \"Sí\"; \"No\")}}\nCliente: {{1.request.client}}\nProyecto: {{1.request.related_project}}\nObjeto: {{1.request.object_and_level}}\nQué hacer: {{1.request.what_needs_to_be_done}}\nIDs: {{1.request.ids_of_objects_involved}}\nValores: {{1.request.expected_field_values}}\nTrigger: {{1.request.event_that_triggers_the_flow}}\nCondiciones: {{1.request.conditions_and_exceptions}}\nPermisos: {{1.request.necessary_permissions}}\nTesting: {{1.request.real_example_for_testing}}\nResultado: {{1.request.expected_technical_result}}\nInfo: {{1.request.additional_information}}\nSolicitado por: {{1.consultant_name}} ({{1.consultant_email}})\nFecha: {{formatDate(1.submitted_at; \"YYYY-MM-DD HH:mm:ss\")}}",
+                "categoryID": "68e5823900050e2ee835d92814eb0778",
+                "DE:Development Type": "{{join(1.request.development_type; \", \")}}",
+                "DE:Is this a New Functionality?": "{{if(1.request.is_new_functionality; \"Yes\"; \"No\")}}",
+                "DE:Related Project": "{{1.request.related_project}}",
+                "DE:Additional Information": "{{1.request.additional_information}}",
+                "DE:Client": "{{1.request.client}}",
+                "DE:Object and level of the field": "{{1.request.object_and_level}}",
+                "DE:What needs to be done": "{{1.request.what_needs_to_be_done}}",
+                "DE:IDs of the objects involved": "{{1.request.ids_of_objects_involved}}",
+                "DE:Expected field values": "{{1.request.expected_field_values}}",
+                "DE:Event that triggers the flow": "{{1.request.event_that_triggers_the_flow}}",
+                "DE:Conditions and exceptions": "{{1.request.conditions_and_exceptions}}",
+                "DE:Necessary permissions": "{{1.request.necessary_permissions}}",
+                "DE:Real example for testing": "{{1.request.real_example_for_testing}}",
+                "DE:Expected technical result": "{{1.request.expected_technical_result}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 600,
+                  "y": 150
+                },
+                "restore": {
+                  "expect": {
+                    "record": {
+                      "label": "Issue"
+                    },
+                    "connection": {
+                      "label": "QStrauss Workfront"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "id": 6,
+              "module": "gateway:WebhookRespond",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "status": "200",
+                "headers": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": "{\"success\": true, \"ticketId\": \"{{4.id}}\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 150
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    },
+    "zone": "us1.make.com"
+  }
+}
