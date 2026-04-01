@@ -1,0 +1,5 @@
+FUSION_WEBHOOK_URL=https://hook.app.workfrontfusion.com/ahsjhxi1m3te5lo6l82wy9i1t2y4pdi1
+
+Webhook Name: QStrauss AI Agent Intake
+Created: 2026-04-01
+Team: 13904 (QStrauss Partner Sandbox)
