@@ -1,0 +1,147 @@
+{
+  "name": "QStrauss AI Agent - Request Intake",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": 1,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 2,
+      "module": "gateway:Router",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 3,
+              "module": "workfront:CreateRecord",
+              "version": 1,
+              "parameters": {},
+              "filter": {
+                "name": "Form General",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{1.form_type}}",
+                      "o": "text:equal",
+                      "b": "general"
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "name": "{{1.request.description_of_requirements}}",
+                "description": "Tipo: {{1.request.type_of_application}}\nPrioridad: {{1.request.priority}}\nCliente: {{1.request.client}}\nProyecto: {{1.request.related_project}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 600,
+                  "y": -150
+                }
+              }
+            },
+            {
+              "id": 5,
+              "module": "gateway:WebhookRespond",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "status": "200",
+                "body": "{\"success\": true, \"ticketId\": \"{{3.id}}\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": -150
+                }
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 4,
+              "module": "workfront:CreateRecord",
+              "version": 1,
+              "parameters": {},
+              "filter": {
+                "name": "Form WF",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{1.form_type}}",
+                      "o": "text:equal",
+                      "b": "wf"
+                    }
+                  ]
+                ]
+              },
+              "mapper": {
+                "name": "{{1.request.what_needs_to_be_done}}",
+                "description": "Desarrollo: {{join(1.request.development_type; \", \")}}\nCliente: {{1.request.client}}\nProyecto: {{1.request.related_project}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 600,
+                  "y": 150
+                }
+              }
+            },
+            {
+              "id": 6,
+              "module": "gateway:WebhookRespond",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "status": "200",
+                "body": "{\"success\": true, \"ticketId\": \"{{4.id}}\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 150
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": {
+      "orphans": []
+    }
+  }
+}
